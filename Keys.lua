@@ -1,3 +1,3 @@
-{
-  "TEST_KEY"
+return {
+    "TEST_KEY"
 }
