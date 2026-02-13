@@ -1,35 +1,42 @@
 local Rayfield, Window
 
+-- 1. Загрузка библиотеки
 local function loadRayfield()
-	local success, err = pcall(function()
-		Rayfield = loadstring(game:HttpGet('https://sirius.menu/rayfield', true))()
-	end)
-	if not success then
-		warn("Rayfield loading error:", err)
-		game:GetService("StarterGui"):SetCore("SendNotification", {
-			Title = "Error",
-			Text = "Failed to load Rayfield UI",
-			Duration = 10
-		})
-		return false
-	end
-	return true
+    local success, err = pcall(function()
+        Rayfield = loadstring(game:HttpGet('https://sirius.menu/rayfield', true))()
+    end)
+    if not success then
+        warn("Rayfield loading error:", err)
+        return false
+    end
+    return true
 end
 
 if not loadRayfield() then return end
-local success, result = pcall(function()
+
+-- 2. Получение и разделение ключей
+local success, rawData = pcall(function()
     return game:HttpGet("https://raw.githubusercontent.com/chstopya090712-wq/Keys/refs/heads/main/Keys.lua")
 end)
 
+local keysTable = {}
+
 if success then
-    print("Данные с GitHub получены:")
-    print(result)
+    -- Этот цикл проходит по каждой строчке файла и добавляет её как ОТДЕЛЬНЫЙ ключ
+    for key in rawData:gmatch("[^\r\n]+") do
+        local clean = key:gsub("%s+", "") -- чистим от невидимых пробелов
+        if clean ~= "" then
+            table.insert(keysTable, clean)
+        end
+    end
+    print("Ключи успешно загружены. Количество:", #keysTable)
 else
-    warn("Ошибка подключения к GitHub: " .. tostring(result))
+    warn("Ошибка подключения к GitHub: " .. tostring(rawData))
+    keysTable = {"BACKUP_KEY_ERROR"} -- запасной ключ на случай сбоя сети
 end
-local rawKey = game:HttpGet("https://raw.githubusercontent.com/chstopya090712-wq/Keys/refs/heads/main/Keys.lua")
-local cleanKey = rawKey:gsub("%s+", "") 
-local Window = Rayfield:CreateWindow({
+
+-- 3. Создание окна
+Window = Rayfield:CreateWindow({
     Name = "blockaded battlefront",
     LoadingTitle = "Initializing system...",
     LoadingSubtitle = "Version 1",
@@ -43,10 +50,10 @@ local Window = Rayfield:CreateWindow({
         Title = "KeySystem",
         Subtitle = "Введите ваш ключ",
         Note = "Ключ можно получить в нашем Discord/Telegram",
-        FileName = "KeySystem_Working_Final", -- Сменил имя для сброса кэша
+        FileName = "BB_Key_System_V1", -- Если добавишь новые ключи и захочешь всех перепроверить, смени на V2
         SaveKey = true, 
-        GrabKeyFromSite = false, -- Мы уже скачали его сами строкой выше
-        Key = {cleanKey} -- Подставляем чистый ключ
+        GrabKeyFromSite = false, 
+        Key = keysTable -- ТЕПЕРЬ ТУТ СПИСОК КЛЮЧЕЙ
     }
 })
 
