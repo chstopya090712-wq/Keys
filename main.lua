@@ -1,5 +1,3 @@
-
--- Protected Rayfield loading
 local Rayfield, Window
 
 local function loadRayfield()
@@ -19,13 +17,37 @@ local function loadRayfield()
 end
 
 if not loadRayfield() then return end
+local success, result = pcall(function()
+    return game:HttpGet("https://raw.githubusercontent.com/chstopya090712-wq/Keys/refs/heads/main/Keys.lua")
+end)
 
--- Create window
-Window = Rayfield:CreateWindow({
-	Name = "blockaded battlefront",
-	LoadingTitle = "Initializing system...",
-	LoadingSubtitle = "Version 1",
-	ConfigurationSaving = { Enabled = true, FolderName = "blockaded battlefrontConfig", FileName = "Settings" }
+if success then
+    print("Данные с GitHub получены:")
+    print(result)
+else
+    warn("Ошибка подключения к GitHub: " .. tostring(result))
+end
+local rawKey = game:HttpGet("https://raw.githubusercontent.com/chstopya090712-wq/Keys/refs/heads/main/Keys.lua")
+local cleanKey = rawKey:gsub("%s+", "") 
+local Window = Rayfield:CreateWindow({
+    Name = "blockaded battlefront",
+    LoadingTitle = "Initializing system...",
+    LoadingSubtitle = "Version 1",
+    ConfigurationSaving = { 
+        Enabled = true, 
+        FolderName = "blockaded battlefrontConfig", 
+        FileName = "Settings" 
+    }, 
+    KeySystem = true,
+    KeySettings = {
+        Title = "KeySystem",
+        Subtitle = "Введите ваш ключ",
+        Note = "Ключ можно получить в нашем Discord/Telegram",
+        FileName = "KeySystem_Working_Final", -- Сменил имя для сброса кэша
+        SaveKey = true, 
+        GrabKeyFromSite = false, -- Мы уже скачали его сами строкой выше
+        Key = {cleanKey} -- Подставляем чистый ключ
+    }
 })
 
 -- Main services
